@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useCart } from "../context/CartContext";
 import api from "../api";
 
@@ -12,6 +11,8 @@ const Books = () => {
   const [wishlistIds, setWishlistIds] = useState([]);
 
   const { addToCart } = useCart();
+
+  const getImageUrl = (image) => `${import.meta.env.VITE_API_URL}/uploads/${image}`;
 
   const fetchBooks = async () => {
     try {
@@ -40,6 +41,8 @@ const Books = () => {
 
   const toggleWishlist = async (bookId) => {
     const token = localStorage.getItem("token");
+    if (!token) return;
+
     try {
       if (wishlistIds.includes(bookId)) {
         await api.delete(`/api/wishlist/${bookId}`, {
@@ -48,18 +51,16 @@ const Books = () => {
         setWishlistIds((prev) => prev.filter((id) => id !== bookId));
       } else {
         await api.post(
-          `/api/wishlist/${bookId}`, // ✅ Corrected
+          `/api/wishlist/${bookId}`,
           {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setWishlistIds((prev) => [...prev, bookId]);
       }
 
-      window.dispatchEvent(new Event("wishlistUpdated")); // ✅ keep count synced
+      window.dispatchEvent(new Event("wishlistUpdated"));
     } catch (err) {
-      console.error("Failed to toggle wishlist", err);
+      console.error("Failed to toggle wishlist:", err);
     }
   };
 
@@ -72,11 +73,17 @@ const Books = () => {
     const fetchWishlist = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const res = await api.get("/api/wishlist", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setWishlistIds(res.data.map((book) => book._id));
+
+      try {
+        const res = await api.get("/api/wishlist", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setWishlistIds(res.data.map((book) => book._id));
+      } catch (err) {
+        console.error("Failed to fetch wishlist:", err);
+      }
     };
+
     fetchWishlist();
   }, []);
 
@@ -84,7 +91,7 @@ const Books = () => {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Available Books</h2>
 
-      {/* Filter Controls */}
+      {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-4">
         <select
           value={genre}
@@ -93,9 +100,7 @@ const Books = () => {
         >
           <option value="">All Genres</option>
           {availableGenres.map((g, i) => (
-            <option key={i} value={g}>
-              {g}
-            </option>
+            <option key={i} value={g}>{g}</option>
           ))}
         </select>
 
@@ -106,33 +111,25 @@ const Books = () => {
         >
           <option value="">All Authors</option>
           {availableAuthors.map((a, i) => (
-            <option key={i} value={a}>
-              {a}
-            </option>
+            <option key={i} value={a}>{a}</option>
           ))}
         </select>
 
         <button
-          onClick={() => {
-            setGenre("");
-            setAuthor("");
-          }}
+          onClick={() => { setGenre(""); setAuthor(""); }}
           className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
         >
           Reset Filters
         </button>
       </div>
 
-      {/* Book Cards */}
+      {/* Books */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {books.map((book) => (
-          <div
-            key={book._id}
-            className="border p-4 rounded shadow bg-white relative"
-          >
+          <div key={book._id} className="border p-4 rounded shadow bg-white relative">
             {book.image && (
               <img
-                src={`http://localhost:5000/uploads/${book.image}`}
+                src={getImageUrl(book.image)}
                 alt={book.title}
                 className="h-48 w-auto object-contain mx-auto"
               />
@@ -150,13 +147,10 @@ const Books = () => {
               Add to Cart
             </button>
 
-            {/* ❤️ Wishlist Heart */}
             <button
               onClick={() => toggleWishlist(book._id)}
               className={`text-2xl absolute top-2 right-2 transition-colors ${
-                wishlistIds.includes(book._id)
-                  ? "text-red-500"
-                  : "text-gray-400"
+                wishlistIds.includes(book._id) ? "text-red-500" : "text-gray-400"
               }`}
               title="Toggle Wishlist"
             >

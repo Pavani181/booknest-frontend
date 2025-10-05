@@ -1,7 +1,7 @@
 // src/pages/Orders.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
 import api from "../api";
+
 const Orders = () => {
   const [orders, setOrders] = useState([]);
 
@@ -78,7 +78,7 @@ const Orders = () => {
                   >
                     {item.book.image && (
                       <img
-                        src={`http://localhost:5000/uploads/${item.book.image}`}
+                        src={`${api.defaults.baseURL}/uploads/${item.book.image}`}
                         alt={item.book.title}
                         className="w-16 h-20 object-cover border"
                       />

@@ -129,7 +129,7 @@ const Books = () => {
           <div key={book._id} className="border p-4 rounded shadow bg-white relative">
             {book.image && (
               <img
-                src={getImageUrl(book.image)}
+                src={`${api.defaults.baseURL}/uploads/${book.image}`}
                 alt={book.title}
                 className="h-48 w-auto object-contain mx-auto"
               />

@@ -52,7 +52,7 @@ const Wishlist = () => {
             <div key={book._id} className="bg-white p-4 rounded shadow">
               {book.image && (
                 <img
-                  src={`/uploads/${book.image}`}
+                  src={`${api.defaults.baseURL}/uploads/${item.book.image}`}
                   alt={book.title}
                   className="h-48 w-auto object-contain mx-auto"
                 />

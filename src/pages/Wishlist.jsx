@@ -52,7 +52,7 @@ const Wishlist = () => {
             <div key={book._id} className="bg-white p-4 rounded shadow">
               {book.image && (
                 <img
-                  src={`${api.defaults.baseURL}/uploads/${item.book.image}`}
+                  src={`${api.defaults.baseURL}/uploads/${book.image}`}
                   alt={book.title}
                   className="h-48 w-auto object-contain mx-auto"
                 />
@@ -60,7 +60,6 @@ const Wishlist = () => {
               <h3 className="font-semibold text-lg mt-2">{book.title}</h3>
               <p className="text-sm text-gray-600">{book.author}</p>
               <p className="text-sm font-bold">₹{book.price}</p>
-
               <button
                 onClick={() => handleMoveToCart(book)}
                 className="bg-green-600 text-white px-3 py-1 rounded mt-2"
